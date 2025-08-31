@@ -303,7 +303,7 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "ivanxho.actual-image-copy.Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "ivanxho.image-copy.Extension";
 				PRODUCT_NAME = "Image Copy Extension";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -335,7 +335,7 @@
 					"-framework",
 					SafariServices,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "ivanxho.actual-image-copy.Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "ivanxho.image-copy.Extension";
 				PRODUCT_NAME = "Image Copy Extension";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -370,7 +370,7 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "ivanxho.actual-image-copy";
+				PRODUCT_BUNDLE_IDENTIFIER = "ivanxho.image-copy";
 				PRODUCT_NAME = "Image Copy";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
@@ -405,7 +405,7 @@
 					"-framework",
 					WebKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "ivanxho.actual-image-copy";
+				PRODUCT_BUNDLE_IDENTIFIER = "ivanxho.image-copy";
 				PRODUCT_NAME = "Image Copy";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
