@@ -40,6 +40,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6FDCFEDB2E651325009870F7 /* Exceptions for "Shared (Extension)" folder in "Image Copy" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/background.js,
+			);
+			target = 6FFA28F12E63BAF6000D8577 /* Image Copy */;
+		};
 		6FFA29372E63BAF6000D8577 /* Exceptions for "Shared (App)" folder in "Image Copy" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -69,7 +76,6 @@
 				Resources/manifest.json,
 				Resources/popup.css,
 				Resources/popup.html,
-				Resources/popup.js,
 				SafariWebExtensionHandler.swift,
 			);
 			target = 6FFA29072E63BAF6000D8577 /* Image Copy Extension (macOS) */;
@@ -88,6 +94,7 @@
 		6FFA28D12E63BAF6000D8577 /* Shared (Extension) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				6FDCFEDB2E651325009870F7 /* Exceptions for "Shared (Extension)" folder in "Image Copy" target */,
 				6FFA29412E63BAF6000D8577 /* Exceptions for "Shared (Extension)" folder in "Image Copy Extension (macOS)" target */,
 			);
 			explicitFolders = (

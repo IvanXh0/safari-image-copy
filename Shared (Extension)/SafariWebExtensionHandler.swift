@@ -13,76 +13,85 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     func beginRequest(with context: NSExtensionContext) {
         let request = context.inputItems.first as? NSExtensionItem
-
-        let profile: UUID?
-        if #available(iOS 17.0, macOS 14.0, *) {
-            profile = request?.userInfo?[SFExtensionProfileKey] as? UUID
-        } else {
-            profile = request?.userInfo?["profile"] as? UUID
+        let message = extractMessage(from: request)
+        
+        guard let messageDict = message as? [String: Any],
+              let action = messageDict["action"] as? String else {
+            sendEchoResponse(context: context, message: message)
+            return
         }
-
-        let message: Any?
+        
+        switch action {
+        case "copyImageData":
+            handleCopyImageData(messageDict: messageDict, context: context)
+        case "copyImage":
+            handleLegacyCopyImage(messageDict: messageDict, context: context)
+        default:
+            sendEchoResponse(context: context, message: message)
+        }
+    }
+    
+    // MARK: - Message Extraction
+    
+    private func extractMessage(from request: NSExtensionItem?) -> Any? {
         if #available(iOS 15.0, macOS 11.0, *) {
-            message = request?.userInfo?[SFExtensionMessageKey]
+            return request?.userInfo?[SFExtensionMessageKey]
         } else {
-            message = request?.userInfo?["message"]
+            return request?.userInfo?["message"]
         }
-
-
-        // Handle image copy request with pre-fetched data
-        if let messageDict = message as? [String: Any],
-           let action = messageDict["action"] as? String,
-           action == "copyImageData",
-           let imageDataBase64 = messageDict["imageData"] as? String,
-           let mimeType = messageDict["mimeType"] as? String {
-            
-            copyImageDataToClipboard(imageDataBase64: imageDataBase64, mimeType: mimeType) { success, error in
-                let response = NSExtensionItem()
-                let responseData: [String: Any] = [
-                    "success": success,
-                    "error": error ?? ""
-                ]
-                
-                if #available(iOS 15.0, macOS 11.0, *) {
-                    response.userInfo = [ SFExtensionMessageKey: responseData ]
-                } else {
-                    response.userInfo = [ "message": responseData ]
-                }
-                
-                context.completeRequest(returningItems: [ response ], completionHandler: nil)
-            }
+    }
+    
+    // MARK: - Request Handlers
+    
+    private func handleCopyImageData(messageDict: [String: Any], context: NSExtensionContext) {
+        guard let imageDataBase64 = messageDict["imageData"] as? String,
+              let mimeType = messageDict["mimeType"] as? String else {
+            sendResponse(context: context, success: false, error: "Missing image data or MIME type")
+            return
         }
-        // Handle legacy image copy request (fallback)
-        else if let messageDict = message as? [String: Any],
-           let action = messageDict["action"] as? String,
-           action == "copyImage",
-           let imageUrl = messageDict["imageUrl"] as? String {
-            
-            copyImageToClipboard(imageUrl: imageUrl) { success, error in
-                let response = NSExtensionItem()
-                let responseData: [String: Any] = [
-                    "success": success,
-                    "error": error ?? ""
-                ]
-                
-                if #available(iOS 15.0, macOS 11.0, *) {
-                    response.userInfo = [ SFExtensionMessageKey: responseData ]
-                } else {
-                    response.userInfo = [ "message": responseData ]
-                }
-                
-                context.completeRequest(returningItems: [ response ], completionHandler: nil)
-            }
+        
+        copyImageDataToClipboard(imageDataBase64: imageDataBase64, mimeType: mimeType) { [weak self] success, error in
+            self?.sendResponse(context: context, success: success, error: error)
+        }
+    }
+    
+    private func handleLegacyCopyImage(messageDict: [String: Any], context: NSExtensionContext) {
+        guard let imageUrl = messageDict["imageUrl"] as? String else {
+            sendResponse(context: context, success: false, error: "Missing image URL")
+            return
+        }
+        
+        copyImageToClipboard(imageUrl: imageUrl) { [weak self] success, error in
+            self?.sendResponse(context: context, success: success, error: error)
+        }
+    }
+    
+    // MARK: - Response Helpers
+    
+    private func sendResponse(context: NSExtensionContext, success: Bool, error: String?) {
+        let response = NSExtensionItem()
+        let responseData: [String: Any] = [
+            "success": success,
+            "error": error ?? ""
+        ]
+        
+        if #available(iOS 15.0, macOS 11.0, *) {
+            response.userInfo = [SFExtensionMessageKey: responseData]
         } else {
-            // Default echo response for other messages
-            let response = NSExtensionItem()
-            if #available(iOS 15.0, macOS 11.0, *) {
-                response.userInfo = [ SFExtensionMessageKey: [ "echo": message ] ]
-            } else {
-                response.userInfo = [ "message": [ "echo": message ] ]
-            }
-            context.completeRequest(returningItems: [ response ], completionHandler: nil)
+            response.userInfo = ["message": responseData]
         }
+        
+        context.completeRequest(returningItems: [response], completionHandler: nil)
+    }
+    
+    private func sendEchoResponse(context: NSExtensionContext, message: Any?) {
+        let response = NSExtensionItem()
+        if #available(iOS 15.0, macOS 11.0, *) {
+            response.userInfo = [SFExtensionMessageKey: ["echo": message]]
+        } else {
+            response.userInfo = ["message": ["echo": message]]
+        }
+        context.completeRequest(returningItems: [response], completionHandler: nil)
     }
     
     private func copyImageToClipboard(imageUrl: String, completion: @escaping (Bool, String?) -> Void) {
@@ -161,12 +170,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
                     return
                 }
                 
-                // Copy to clipboard
-                let pasteboard = NSPasteboard.general
-                pasteboard.clearContents()
-                
-                let success = pasteboard.writeObjects([image])
-                completion(success, success ? nil : "Failed to copy to clipboard")
+                self.writeImageToClipboard(image, completion: completion)
             }
         }.resume()
     }
@@ -182,7 +186,12 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             return
         }
         
-        // Copy to clipboard
+        writeImageToClipboard(image, completion: completion)
+    }
+    
+    // MARK: - Clipboard Helper
+    
+    private func writeImageToClipboard(_ image: NSImage, completion: @escaping (Bool, String?) -> Void) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         

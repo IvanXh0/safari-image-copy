@@ -27,110 +27,11 @@ function showNotification(message, isError = false) {
 }
 
 
-async function downloadImage(imageUrl) {
-  try {
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+// Removed unused clipboard functions - we use native messaging instead
 
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-
-    let filename = "image";
-    try {
-      const urlPath = new URL(imageUrl).pathname;
-      const urlFilename = urlPath.split("/").pop();
-      if (urlFilename && urlFilename.includes(".")) {
-        filename = urlFilename;
-      } else {
-        const extension = blob.type.split("/")[1] || "png";
-        filename = `image.${extension}`;
-      }
-    } catch {
-      filename = "image.png";
-    }
-
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    throw error;
-  }
-}
-
-async function copyImageWithUserInteraction(imageUrl) {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  const img = new Image();
-
-  img.crossOrigin = "anonymous";
-
-  return new Promise((resolve, reject) => {
-    img.onload = () => {
-      try {
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-        ctx.drawImage(img, 0, 0);
-
-        canvas.toBlob(async (blob) => {
-          if (!blob) {
-            reject(new Error("Failed to create blob"));
-            return;
-          }
-
-          setTimeout(async () => {
-            try {
-              await navigator.clipboard.write([
-                new ClipboardItem({
-                  [blob.type]: blob,
-                }),
-              ]);
-              resolve();
-            } catch (clipboardError) {
-              reject(clipboardError);
-            }
-          }, 0);
-        }, "image/png");
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    img.onerror = () => reject(new Error("Failed to load image"));
-    img.src = imageUrl;
-  });
-}
-
-async function copyImageToClipboard(imageUrl) {
-  try {
-    const imagePromise = fetch(imageUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.blob();
-      });
-
-    const clipboardItem = new ClipboardItem({
-      "image/png": imagePromise,
-    });
-
-    await navigator.clipboard.write([clipboardItem]);
-    showNotification("Image copied to clipboard");
-  } catch (error) {
-    showNotification("Failed to copy image: " + error.message, true);
-  }
-}
-
+// Message handler for notifications
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "showNotification") {
     showNotification(request.message, request.isError || false);
-  } else if (request.action === "copyImageFallback") {
-    copyImageToClipboard(request.imageUrl);
   }
 });
