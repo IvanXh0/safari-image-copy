@@ -1,0 +1,10 @@
+{
+    "extension_name": {
+        "message": "Image Copy",
+        "description": "The display name for the extension."
+    },
+    "extension_description": {
+        "message": "Copy images directly to your clipboard with a simple right-click. Works with any image on any website.",
+        "description": "Description of what the extension does."
+    }
+}
