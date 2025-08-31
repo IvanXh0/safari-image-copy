@@ -97,19 +97,9 @@
 			path = "Shared (Extension)";
 			sourceTree = "<group>";
 		};
-		6FFA28E22E63BAF6000D8577 /* iOS (App) */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "iOS (App)";
-			sourceTree = "<group>";
-		};
 		6FFA28F32E63BAF6000D8577 /* macOS (App) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "macOS (App)";
-			sourceTree = "<group>";
-		};
-		6FFA29022E63BAF6000D8577 /* iOS (Extension) */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "iOS (Extension)";
 			sourceTree = "<group>";
 		};
 		6FFA290C2E63BAF6000D8577 /* macOS (Extension) */ = {
@@ -145,9 +135,7 @@
 			children = (
 				6FFA28C82E63BAF6000D8577 /* Shared (App) */,
 				6FFA28D12E63BAF6000D8577 /* Shared (Extension) */,
-				6FFA28E22E63BAF6000D8577 /* iOS (App) */,
 				6FFA28F32E63BAF6000D8577 /* macOS (App) */,
-				6FFA29022E63BAF6000D8577 /* iOS (Extension) */,
 				6FFA290C2E63BAF6000D8577 /* macOS (Extension) */,
 				6FFA28E12E63BAF6000D8577 /* Products */,
 			);
